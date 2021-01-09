@@ -13,8 +13,7 @@ RoxygenNote: 7.1.1
 Suggests: 
     testthat (>= 3.0.0),
     keyring,
-    stringi,
-    magrittr
+    stringi
 Config/testthat/edition: 3
 Imports:
     R6,
@@ -22,4 +21,7 @@ Imports:
     purrr,
     tibble,
     stringr,
-    httr
+    httr,
+    magrittr,
+    readr,
+    tidyr

@@ -5,13 +5,16 @@
 #' @param query query
 #' @param url url
 #'
-#' @importFrom dplyr %>% mutate filter
-#' @importFrom purrr pluck map map_chr set_names
-#' @importFrom tibble enframe
-#' @importFrom stringr str_c
+#' @import dplyr
+#' @import purrr
+#' @import tibble
+#' @import tidyr
+#'
+#' @importFrom readr parse_number
+#' @importFrom magrittr %<>%
+#' @importFrom stringr str_c str_remove str_to_sentence str_glue str_replace_all
 #' @importFrom R6 R6Class
 #' @importFrom httr GET content
-#'
 #'
 #' @export
 
@@ -194,7 +197,7 @@ e_stat <- R6Class("e_stat",
                             select(-tab) %>%
                             replace_na(list(unit = "")) %>%
                             pivot_wider(names_from = c(name, unit),
-                                        names_glue = '{name}{if_else(unit == "", "", "_")}{unit}',
+                                        names_glue = '{name}{dplyr::if_else(unit == "", "", "_")}{unit}',
                                         values_from = value) %>%
                             rowid_to_column()
 

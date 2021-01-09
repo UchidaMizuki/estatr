@@ -9,7 +9,7 @@ get_appId <- function() {
 test_that("", {
   appId <- get_appId()
 
-  e_stat_ <- e_stat$new("0003413193", appId)
+  .e_stat <- e_stat$new("0003413193", appId)
 
   .e_stat$key[[stringi::stri_unescape_unicode("\\u79fb\\u52d5\\u5f8c\\u306e\\u4f4f\\u6240\\u5730(\\u73fe\\u4f4f\\u5730)2019\\uff5e")]] %<>%
     filter(name == stringi::stri_unescape_unicode("\\u5317\\u6d77\\u9053"))
