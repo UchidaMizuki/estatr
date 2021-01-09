@@ -18,7 +18,7 @@
 #'
 #' @export
 
-estat <- R6Class("e_stat",
+estat <- R6Class("estat",
                  public = list(
                    statsDataId = NULL,
                    query = NULL,
