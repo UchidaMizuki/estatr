@@ -9,9 +9,6 @@
 #' @param query query
 #' @param url url
 #'
-#' @importFrom dplyr %>%
-#' @importFrom httr GET content
-#'
 #' @export
 
 e_stat <- R6Class("e_stat",
