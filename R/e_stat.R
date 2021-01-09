@@ -1,7 +1,3 @@
-# library(tidyverse)
-# library(R6)
-# library(httr)
-
 #' Create e-Stat object
 #'
 #' @param statsDataId e-Stat statsDataId
