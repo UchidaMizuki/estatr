@@ -6,8 +6,9 @@
 #' @param url url
 #'
 #' @importFrom dplyr %>% mutate filter
-#' @importFrom purrr pluck map_chr
+#' @importFrom purrr pluck map map_chr set_names
 #' @importFrom tibble enframe
+#' @importFrom stringr str_c
 #' @importFrom R6 R6Class
 #' @importFrom httr GET content
 #'
