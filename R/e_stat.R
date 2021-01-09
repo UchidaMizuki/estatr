@@ -5,7 +5,12 @@
 #' @param query query
 #' @param url url
 #'
+#' @importFrom dplyr mutate
+#' @importFrom purrr pluck
+#' @importFrom tibble enframe
 #' @importFrom R6 R6Class
+#' @importFrom httr GET content
+#'
 #'
 #' @export
 

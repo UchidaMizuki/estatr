@@ -2,3 +2,8 @@
 
 export(e_stat)
 importFrom(R6,R6Class)
+importFrom(dplyr,mutate)
+importFrom(httr,GET)
+importFrom(httr,content)
+importFrom(purrr,pluck)
+importFrom(tibble,enframe)
