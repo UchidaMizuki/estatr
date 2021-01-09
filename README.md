@@ -6,25 +6,22 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of estatquery is to …
+e-Stat
+APIのクエリの作成・データのダウンロードを行うためのパッケージです．
+このサービスは、政府統計総合窓口(e-Stat)のAPI機能を使用していますが、サービスの内容は国によって保証されたものではありません。
 
-## Installation
+## インストール
 
-You can install the released version of estatquery from
-[CRAN](https://CRAN.R-project.org) with:
-
-    install.packages("estatquery")
-
-And the development version from [GitHub](https://github.com/) with:
+CRAN上には公開されていないため，GitHubからインストールしてください．
 
     # install.packages("devtools")
     devtools::install_github("UchidaMizuki/estatquery")
 
-## Example
+## 使用例
 
 This is a basic example which shows you how to solve a common problem:
 
-    # library(estatquery)
+    library(estatquery)
     ## basic example code
 
 What is special about using `README.Rmd` instead of just `README.md`?
