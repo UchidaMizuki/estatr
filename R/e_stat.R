@@ -1,6 +1,18 @@
-library(tidyverse)
-library(R6)
-library(httr)
+# library(tidyverse)
+# library(R6)
+# library(httr)
+
+#' Create e-Stat object
+#'
+#' @param statsDataId e-Stat statsDataId
+#' @param appId Your own e-Stat appId
+#' @param query query
+#' @param url url
+#'
+#' @importFrom dplyr %>%
+#' @importFrom httr GET content
+#'
+#' @export
 
 e_stat <- R6Class("e_stat",
                   public = list(
@@ -16,8 +28,7 @@ e_stat <- R6Class("e_stat",
                     initialize = function(statsDataId,
                                           appId,
                                           query = list(),
-                                          url = "http://api.e-stat.go.jp/rest/3.0/app/json/getStatsData",
-                                          change_appId = F) {
+                                          url = "http://api.e-stat.go.jp/rest/3.0/app/json/getStatsData") {
 
                       self$statsDataId <- statsDataId
                       self$query <- query %>%
