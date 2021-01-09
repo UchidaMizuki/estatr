@@ -9,6 +9,8 @@
 #' @param query query
 #' @param url url
 #'
+#' @importFrom R6 R6Class
+#'
 #' @export
 
 e_stat <- R6Class("e_stat",
