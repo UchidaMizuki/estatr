@@ -17,7 +17,6 @@
 #' @importFrom httr GET content
 #'
 #' @export
-
 estat <- R6Class("estat",
                  public = list(
                    statsDataId = NULL,
