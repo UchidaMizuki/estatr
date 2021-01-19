@@ -6,9 +6,8 @@ get_appId <- function() {
   keyring::key_get("e-Stat-appId")
 }
 
-test_that("", {
+test_that("00200523_jumin-kihon-daicho-jinko-ido-chosa", {
   appId <- get_appId()
-
   .estat <- estat$new("0003413193", appId)
 
   .estat$key[[stringi::stri_unescape_unicode("\\u79fb\\u52d5\\u5f8c\\u306e\\u4f4f\\u6240\\u5730(\\u73fe\\u4f4f\\u5730)2019\\uff5e")]] %<>%
@@ -17,6 +16,22 @@ test_that("", {
     filter(name == stringi::stri_unescape_unicode("\\u79fb\\u52d5\\u8005"))
   .estat$key[[stringi::stri_unescape_unicode("\\u79fb\\u52d5\\u524d\\u306e\\u4f4f\\u6240\\u5730(\\u524d\\u4f4f\\u5730)2019\\uff5e")]] %<>%
     filter(name == stringi::stri_unescape_unicode("\\u7dcf\\u6570\\uff08\\u524d\\u4f4f\\u5730\\uff09"))
+
+  .estat_data <- .estat$get_data()
+  expect_s3_class(.estat_data, "data.frame")
+})
+
+test_that("00200521_kokuse-chosa", {
+  appId <- get_appId()
+  .estat <- estat$new("0000033787", appId)
+
+  .estat$key[[stringi::stri_unescape_unicode("\\u5e74\\u9f62\\u968e\\u7d1a031470")]] %<>%
+    filter(str_detect(name, stringi::stri_unescape_unicode("^\\\\d{1,2}\\uff5e\\\\d{1,2}\\u6b73$")) | name == stringi::stri_unescape_unicode("100\\u6b73\\u4ee5\\u4e0a"))
+  .estat$key[[stringi::stri_unescape_unicode("\\u7537\\u5973031421")]] %<>%
+    filter(name %in% c(stringi::stri_unescape_unicode("\\u7537"), stringi::stri_unescape_unicode("\\u5973")))
+  .estat$key[[stringi::stri_unescape_unicode("\\u5730\\u57df030282")]] %<>%
+    filter(code == "01000")
+
   .estat_data <- .estat$get_data()
   expect_s3_class(.estat_data, "data.frame")
 })

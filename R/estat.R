@@ -11,8 +11,8 @@
 #' @import tidyr
 #'
 #' @importFrom readr parse_number
-#' @importFrom magrittr %<>%
-#' @importFrom stringr str_c str_remove str_to_sentence str_glue str_replace_all
+#' @importFrom magrittr %<>% equals not
+#' @importFrom stringr str_c str_remove str_remove_all str_to_sentence str_glue str_replace_all
 #' @importFrom R6 R6Class
 #' @importFrom httr GET content
 #'
@@ -53,41 +53,78 @@ estat <- R6Class("estat",
                        stop(GET_STATS_DATA$RESULT$ERROR_MSG)
                      }
 
-                     self$total <- GET_STATS_DATA$STATISTICAL_DATA$RESULT_INF$TOTAL_NUMBER
-                     self$info <- GET_STATS_DATA$STATISTICAL_DATA$TABLE_INF %>%
+                     self$total <- GET_STATS_DATA %>%
+                       pluck("STATISTICAL_DATA", "RESULT_INF", "TOTAL_NUMBER")
+                     self$info <- GET_STATS_DATA %>%
+                       pluck("STATISTICAL_DATA", "TABLE_INF") %>%
                        enframe() %>%
                        filter(name != "@id") %>%
                        mutate(value = value %>%
                                 map_chr(. %>%
                                           str_c(collapse = "_")))
 
-                     CLASS_OBJ <- GET_STATS_DATA$STATISTICAL_DATA$CLASS_INF$CLASS_OBJ
+                     CLASS_OBJ <- GET_STATS_DATA %>%
+                       pluck("STATISTICAL_DATA", "CLASS_INF", "CLASS_OBJ")
 
                      # set key
                      private$key_id <- CLASS_OBJ %>%
-                       tail(-1) %>%
-                       map_chr(~ .$`@id`)
+                       keep(. %>%
+                              pluck("@id") %>%
+                              equals("tab") %>%
+                              not()) %>%
+                       map_chr(. %>%
+                                 pluck("@id"))
                      private$key_name <- CLASS_OBJ %>%
-                       tail(-1) %>%
-                       map_chr(~ .$`@name`)
+                       keep(. %>%
+                              pluck("@id") %>%
+                              equals("tab") %>%
+                              not()) %>%
+                       map_chr(. %>%
+                                 pluck("@name"))
                      private$key_raw <- CLASS_OBJ %>%
-                       tail(-1) %>%
+                       keep(. %>%
+                              pluck("@id") %>%
+                              equals("tab") %>%
+                              not()) %>%
                        map(. %>%
                              pluck("CLASS") %>%
                              bind_rows() %>%
                              rename_with(. %>%
-                                           str_remove("^@"))) %>%
+                                           str_remove("^@")) %>%
+                             mutate(across(name,
+                                           . %>%
+                                             str_remove_all("\\s")))) %>%
                        set_names(private$key_name)
                      self$key <- private$key_raw
 
                      # set value
-                     private$value_raw <- CLASS_OBJ[[1]]$CLASS %>%
+                     private$value_raw <- CLASS_OBJ %>%
+                       keep(. %>%
+                              pluck("@id") %>%
+                              equals("tab")) %>%
+                       first() %>%
+                       pluck("CLASS") %>%
                        bind_rows() %>%
                        rename_with(. %>%
-                                     str_remove("^@"))
+                                     str_remove("^@")) %>%
+                       mutate(across(any_of("name"),
+                                     . %>%
+                                       str_remove_all("\\s")))
                      self$value <- private$value_raw
                    },
-                   get_data = function(limit = 10 ^ 5) {
+                   get_data = function() {
+                     limit_downloads <- 10 ^ 5
+                     limit_items <- 10 ^ 2
+
+                     # check key
+                     private$key_id %>%
+                       seq_along() %>%
+                       walk(~ {
+                         if (nrow(self$key[[.x]]) == 0) {
+                           stop(str_glue('The key for "{names(self$key)[.x]}" is empty.'))
+                         }
+                       })
+
                      # make key query
                      code_key <- private$key_raw %>%
                        map(. %>%
@@ -101,6 +138,10 @@ estat <- R6Class("estat",
                                   if (setequal(self$key[[.x]]$code, code_key[[.x]])) {
                                     NA_character_
                                   } else {
+                                    if (length(self$key[[.x]]$code) > limit_items) {
+                                      stop(str_glue('The number of items in "{names(self$key)[.x]}" is too many (up to {limit_items} items per attribute). This error can be avoided by avoiding the use of not-equals.'))
+                                    }
+
                                     self$key[[.x]]$code %>%
                                       str_c(collapse = ",")
                                   }
@@ -109,13 +150,20 @@ estat <- R6Class("estat",
                        drop_na(code)
 
                      # make value query
-                     code_value <- private$value_raw$code
-                     if (setequal(self$value$code, code_value)) {
-                       query_value <- tibble()
+                     if (nrow(private$value_raw) >= 1) {
+                       if (setequal(self$value$code, private$value_raw$code)) {
+                         query_value <- tibble()
+                       } else {
+                         if (length(self$value$code) > limit_items) {
+                           stop(str_glue('The number of items in "tab" is too many (up to {limit_items} items per attribute). This error can be avoided by avoiding the use of not-equals.'))
+                         }
+
+                         query_value <- tibble(id = "cdTab",
+                                               code = self$value$code %>%
+                                                 str_c(collapse = ","))
+                       }
                      } else {
-                       query_value <- tibble(id = "cdTab",
-                                             code = self$value$code %>%
-                                               str_c(collapse = ","))
+                       query_value <- tibble()
                      }
 
                      query <- bind_rows(query_key,
@@ -143,7 +191,9 @@ estat <- R6Class("estat",
                        stop(GET_STATS_DATA$RESULT$ERROR_MSG)
                      }
 
-                     total <- GET_STATS_DATA$STATISTICAL_DATA$RESULT_INF$TOTAL_NUMBER
+                     total <- GET_STATS_DATA %>%
+                       pluck("STATISTICAL_DATA", "RESULT_INF", "TOTAL_NUMBER")
+                     print(str_glue("The total number of data is {total}."))
 
                      # key
                      key <- list(self$key, names(self$key)) %>%
@@ -151,20 +201,19 @@ estat <- R6Class("estat",
                                  mutate(col_name = .y))
 
                      # get data
-                     self$data <- seq(1, total, limit) %>%
+                     self$data <- seq(1, total, limit_downloads) %>%
                        map_df(function(startPosition) {
 
-                         endPosition <- format(startPosition + limit - 1,
+                         endPosition <- format(startPosition + limit_downloads - 1,
                                                scientific = F)
-                         str_glue("Downloading data from lines {startPosition} to {endPosition}") %>%
-                           print()
+                         print(str_glue("Downloading data from lines {startPosition} to {endPosition}"))
 
                          Sys.sleep(1)
                          GET_STATS_DATA <- GET(url = self$url,
                                                query = query %>%
                                                  c(list(startPosition = format(startPosition,
                                                                                scientific = F),
-                                                        limit = format(limit,
+                                                        limit_downloads = format(limit_downloads,
                                                                        scientific = F)))) %>%
                            content() %>%
                            pluck("GET_STATS_DATA")
@@ -173,48 +222,75 @@ estat <- R6Class("estat",
                            stop(GET_STATS_DATA$RESULT$ERROR_MSG)
                          }
 
-                         DATA_INF <- GET_STATS_DATA$STATISTICAL_DATA$DATA_INF
+                         DATA_INF <- GET_STATS_DATA %>%
+                           pluck("STATISTICAL_DATA", "DATA_INF")
 
                          if (startPosition == 1) {
-                           self$note <- DATA_INF$NOTE %>%
+                           self$note <- DATA_INF %>%
+                             pluck("NOTE") %>%
                              enframe() %>%
                              mutate(value = value %>%
                                       map_chr(. %>%
                                                 str_c(collapse = "_")))
                          }
 
-                         VALUE <- DATA_INF$VALUE %>%
+                         VALUE <- DATA_INF %>%
+                           pluck("VALUE") %>%
                            bind_rows() %>%
                            rename(value = `$`) %>%
                            rename_with(. %>%
                                          str_remove("^@") %>%
                                          str_replace_all(private$key_name %>%
                                                            set_names(private$key_id))) %>%
-                           mutate(value = parse_number(value)) %>%
-                           left_join(self$value %>%
-                                       select(code, name),
-                                     by = c("tab" = "code")) %>%
-                           select(-tab) %>%
-                           replace_na(list(unit = "")) %>%
-                           pivot_wider(names_from = c(name, unit),
-                                       names_glue = '{name}{dplyr::if_else(unit == "", "", "_")}{unit}',
-                                       values_from = value) %>%
-                           rowid_to_column()
+                           mutate(across(value,
+                                         . %>%
+                                           parse_number(na = c("***"))))
 
-                         VALUE %>%
-                           select(rowid, all_of(private$key_name)) %>%
-                           pivot_longer(-rowid,
-                                        names_to = "col_name",
-                                        values_to = "code") %>%
-                           left_join(key,
-                                     by = c("col_name", "code")) %>%
-                           pivot_wider(names_from = col_name,
-                                       values_from = -c(rowid, col_name)) %>%
-                           select(-where(~ all(is.na(.)))) %>%
-                           left_join(VALUE %>%
-                                       select(-all_of(private$key_name)),
-                                     by = "rowid") %>%
-                           select(-rowid)
+                         if (nrow(private$value_raw) >= 1) {
+                           VALUE %<>%
+                             left_join(self$value %>%
+                                         select(code, name),
+                                       by = c("tab" = "code")) %>%
+                             select(-tab) %>%
+                             replace_na(list(unit = "")) %>%
+                             pivot_wider(names_from = c(name, unit),
+                                         names_glue = '{name}{dplyr::if_else(unit == "", "", "_")}{unit}',
+                                         values_from = value) %>%
+                             rowid_to_column()
+
+                           VALUE %>%
+                             select(rowid, all_of(private$key_name)) %>%
+                             pivot_longer(-rowid,
+                                          names_to = "col_name",
+                                          values_to = "code") %>%
+                             left_join(key,
+                                       by = c("col_name", "code")) %>%
+                             pivot_wider(names_from = col_name,
+                                         values_from = -c(rowid, col_name)) %>%
+                             select(-where(~ all(is.na(.)))) %>%
+                             left_join(VALUE %>%
+                                         select(-all_of(private$key_name)),
+                                       by = "rowid") %>%
+                             select(-rowid)
+                         } else {
+                           VALUE %<>%
+                             rowid_to_column()
+
+                           VALUE %>%
+                             select(-value) %>%
+                             pivot_longer(-rowid,
+                                          names_to = "col_name",
+                                          values_to = "code") %>%
+                             left_join(key,
+                                       by = c("col_name", "code")) %>%
+                             pivot_wider(names_from = col_name,
+                                         values_from = -c(rowid, col_name)) %>%
+                             select(-where(~ all(is.na(.)))) %>%
+                             left_join(VALUE %>%
+                                         select(rowid, value),
+                                       by = "rowid") %>%
+                             select(-rowid)
+                         }
                        })
 
                      self$data
