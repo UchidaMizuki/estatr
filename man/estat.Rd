@@ -50,7 +50,7 @@ Create e-Stat object
 \if{latex}{\out{\hypertarget{method-get_data}{}}}
 \subsection{Method \code{get_data()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{estat$get_data(limit = 10^5)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{estat$get_data()}\if{html}{\out{</div>}}
 }
 
 }

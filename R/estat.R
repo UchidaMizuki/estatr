@@ -12,7 +12,7 @@
 #'
 #' @importFrom readr parse_number
 #' @importFrom magrittr %<>% equals not
-#' @importFrom stringr str_c str_remove str_remove_all str_to_sentence str_glue str_replace_all
+#' @importFrom stringr str_c str_remove str_remove_all str_to_sentence str_glue str_replace_all str_detect
 #' @importFrom R6 R6Class
 #' @importFrom httr GET content
 #'
