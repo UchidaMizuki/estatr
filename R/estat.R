@@ -252,6 +252,7 @@ estat <- R6Class("estat",
                                          select(code, name),
                                        by = c("tab" = "code")) %>%
                              select(-tab) %>%
+                             mutate(unit = if(exists("unit")) unit else "") %>%
                              replace_na(list(unit = "")) %>%
                              pivot_wider(names_from = c(name, unit),
                                          names_glue = '{name}{dplyr::if_else(unit == "", "", "_")}{unit}',

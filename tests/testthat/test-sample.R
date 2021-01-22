@@ -35,3 +35,18 @@ test_that("00200521_kokuse-chosa", {
   .estat_data <- .estat$get_data()
   expect_s3_class(.estat_data, "data.frame")
 })
+
+test_that("00200552_keizai-census-kiso-chosa", {
+  appId <- get_appId()
+  .estat <- estat$new("0003032610", appId)
+
+  .estat$key[[stringi::stri_unescape_unicode("H21_1-1\\u7d4c\\u55b6\\u7d44\\u7e544\\u533a\\u5206\\uff9b")]] %<>%
+    filter(name == stringi::stri_unescape_unicode("\\u6c11\\u55b6"))
+  .estat$key[[stringi::stri_unescape_unicode("H21_8\\u958b\\u8a2d\\u6642\\u671f14\\u533a\\u5206")]] %<>%
+    filter(name == stringi::stri_unescape_unicode("\\u7dcf\\u6570"))
+  .estat$value %<>%
+    filter(name == stringi::stri_unescape_unicode("\\u4e8b\\u696d\\u6240\\u6570"))
+
+  .estat_data <- .estat$get_data()
+  expect_s3_class(.estat_data, "data.frame")
+})
