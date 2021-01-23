@@ -1,4 +1,4 @@
 library(testthat)
-library(estatquery)
+library(estatr)
 
-test_check("estatquery")
+test_check("estatr")
