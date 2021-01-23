@@ -243,8 +243,7 @@ estat <- R6Class("estat",
                                          str_replace_all(private$key_name %>%
                                                            set_names(private$key_id))) %>%
                            mutate(across(value,
-                                         . %>%
-                                           parse_number(na = c("***"))))
+                                         parse_number))
 
                          if (nrow(private$value_raw) >= 1) {
                            VALUE %<>%
