@@ -293,8 +293,6 @@ estat <- R6Class("estat",
                              select(-rowid)
                          }
                        })
-
-                     self$data
                    },
                    restore_key = function() {
                      self$key <- private$key_raw

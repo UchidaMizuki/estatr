@@ -16,9 +16,9 @@ test_that("00200523_jumin-kihon-daicho-jinko-ido-chosa", {
     filter(name == stringi::stri_unescape_unicode("\\u79fb\\u52d5\\u8005"))
   .estat$key[[stringi::stri_unescape_unicode("\\u79fb\\u52d5\\u524d\\u306e\\u4f4f\\u6240\\u5730(\\u524d\\u4f4f\\u5730)2019\\uff5e")]] %<>%
     filter(name == stringi::stri_unescape_unicode("\\u7dcf\\u6570\\uff08\\u524d\\u4f4f\\u5730\\uff09"))
+  .estat$get_data()
 
-  .estat_data <- .estat$get_data()
-  expect_s3_class(.estat_data, "data.frame")
+  expect_s3_class(.estat$data, "data.frame")
 })
 
 test_that("00200521_kokuse-chosa", {
@@ -31,9 +31,9 @@ test_that("00200521_kokuse-chosa", {
     filter(name %in% c(stringi::stri_unescape_unicode("\\u7537"), stringi::stri_unescape_unicode("\\u5973")))
   .estat$key[[stringi::stri_unescape_unicode("\\u5730\\u57df030282")]] %<>%
     filter(code == "01000")
+  .estat$get_data()
 
-  .estat_data <- .estat$get_data()
-  expect_s3_class(.estat_data, "data.frame")
+  expect_s3_class(.estat$data, "data.frame")
 })
 
 test_that("00200552_keizai-census-kiso-chosa", {
@@ -46,7 +46,7 @@ test_that("00200552_keizai-census-kiso-chosa", {
     filter(name == stringi::stri_unescape_unicode("\\u7dcf\\u6570"))
   .estat$value %<>%
     filter(name == stringi::stri_unescape_unicode("\\u4e8b\\u696d\\u6240\\u6570"))
+  .estat$get_data()
 
-  .estat_data <- .estat$get_data()
-  expect_s3_class(.estat_data, "data.frame")
+  expect_s3_class(.estat$data, "data.frame")
 })
