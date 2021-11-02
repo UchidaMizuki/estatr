@@ -139,7 +139,7 @@ estat <- R6Class("estat",
                                     NA_character_
                                   } else {
                                     if (length(self$key[[.x]]$code) > limit_items) {
-                                      stop(str_glue('The number of items in "{names(self$key)[.x]}" is too many (up to {limit_items} items per attribute). This error can be avoided by avoiding the use of not-equals.'))
+                                      stop(str_glue('The number of items in "{names(self$key)[.x]}" is too many (up to {limit_items} items per attribute).'))
                                     }
 
                                     self$key[[.x]]$code %>%
@@ -155,7 +155,7 @@ estat <- R6Class("estat",
                          query_value <- tibble()
                        } else {
                          if (length(self$value$code) > limit_items) {
-                           stop(str_glue('The number of items in "tab" is too many (up to {limit_items} items per attribute). This error can be avoided by avoiding the use of not-equals.'))
+                           stop(str_glue('The number of items in "tab" is too many (up to {limit_items} items per attribute).'))
                          }
 
                          query_value <- tibble(id = "cdTab",
@@ -214,7 +214,7 @@ estat <- R6Class("estat",
                                                  c(list(startPosition = format(startPosition,
                                                                                scientific = F),
                                                         limit_downloads = format(limit_downloads,
-                                                                       scientific = F)))) %>%
+                                                                                 scientific = F)))) %>%
                            content() %>%
                            pluck("GET_STATS_DATA")
 
@@ -243,7 +243,8 @@ estat <- R6Class("estat",
                                          str_replace_all(private$key_name %>%
                                                            set_names(private$key_id))) %>%
                            mutate(across(value,
-                                         parse_number))
+                                         . %>%
+                                           parse_number(na = c("***", "-"))))
 
                          if (nrow(private$value_raw) >= 1) {
                            VALUE %<>%
